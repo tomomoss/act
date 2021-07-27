@@ -2,6 +2,10 @@
 
 Advanced Commandprompt Transpiler（ACT）は独自言語で書かれたソースコードをWindows系OSに標準搭載されているシェル、Command Promptで実行可能な形式に変換するWebアプリです。
 
+現在、バージョン1.0.0です。以下ページから利用できます。
+
+[Advanced Commandprompt Transpiler 1.0.0](https://tomomoss.github.io/act/)
+
 ## 操作方法
 
 向かって左側のエディターにソースコードを入力してください。入力内容が変化するたびに変換処理が実行され、変換結果が右側のエディターに表示されます。
