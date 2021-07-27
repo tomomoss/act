@@ -1,0 +1,152 @@
+@charset "UTF-8";
+
+@keyframes caret-blinking {
+  0% {
+    border-left-color: rgb(51, 51, 51);
+  }
+  50% {
+    border-left-color: transparent;
+  }
+}
+
+:root {
+  --default-background-color: rgb(255, 255, 255);
+  --default-color: rgb(51, 51, 51);
+  --default-line-height: 1.25rem;
+  --sub-color-level-1: rgb(238, 238, 238);
+  --sub-color-level-2: rgb(221, 221, 221);
+  --sub-color-level-3: rgb(204, 204, 204);
+}
+
+.tom-editor {
+  bottom: 0;
+  display: flex;
+  font: normal 1rem/var(--default-line-height) Consolas, 'Courier New', monospace;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  white-space: pre;
+}
+.tom-editor__caret {
+  animation: 1.25s steps(1) infinite both;
+  background: transparent;
+  border: none;
+  border-left: solid 0.125rem;
+  color: transparent;
+  display: none;
+  height: var(--default-line-height);
+  margin: 0;
+  max-width: 0.01px;
+  outline: none;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  resize: none;
+}
+.tom-editor__caret--active {
+  display: inline-block;
+}
+.tom-editor__caret--blinking-animation-active {
+  animation-name: caret-blinking;
+}
+.tom-editor__decoration-underline {
+  border-bottom: solid 0.1rem var(--sub-color-level-1);
+  cursor: default;
+  display: none;
+  height: 0;
+  margin: 0 0.5rem 0 0;
+  position: absolute;
+}
+.tom-editor__decoration-underline--active {
+  display: block;
+}
+.tom-editor__editor-wrapper {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+.tom-editor__horizontal-scrollbar-area {
+  bottom: 0;
+  display: none;
+  height: 1rem;
+  position: absolute;
+}
+.tom-editor__horizontal-scrollbar-area--active {
+  display: block;
+}
+.tom-editor__horizontal-scrollbar__horizontal-scrollbar {
+  background: var(--sub-color-level-1);
+  height: 100%;
+  position: absolute;
+  z-index: 1;
+}
+.tom-editor__horizontal-scrollbar__horizontal-scrollbar:hover {
+  background: var(--sub-color-level-2);
+}
+.tom-editor__horizontal-scrollbar__horizontal-scrollbar:active {
+  background: var(--sub-color-level-3);
+}
+.tom-editor__line-number-area {
+  background: var(--default-background-color);
+  flex: 0 0;
+  overflow: hidden;
+  padding: 0.5rem 2rem 0 0;
+  text-align: right;
+  z-index: 1;
+}
+.tom-editor__line-number-area__line-number {
+  color: rgb(204, 204, 204);
+  cursor: default;
+}
+.tom-editor__line-number-area__line-number--focus {
+  color: var(--default-color);
+}
+.tom-editor__text-area {
+  background: var(--default-background-color);
+  color: var(--default-color);
+  cursor: text;
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: 0.5rem 0 0;
+  position: relative;
+}
+.tom-editor__text-area--read-only {
+  cursor: default;
+}
+.tom-editor__text-area__character {
+  display: inline-block;
+}
+.tom-editor__text-area__character--select {
+  background: rgb(187, 221, 255);
+}
+.tom-editor__text-area__negative-space {
+  width: 2rem;
+}
+.tom-editor__text-area__text-lines-wrapper {
+  flex: 1 1 auto;
+}
+.tom-editor__virtical-scrollbar-area {
+  background: var(--default-background-color);
+  border-left: solid 0.1rem var(--sub-color-level-1);
+  flex: 0 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+.tom-editor__virtical-scrollbar-area__virtical-scrollbar {
+  background: var(--sub-color-level-1);
+  display: none;
+  position: absolute;
+  width: 100%;
+}
+.tom-editor__virtical-scrollbar-area__virtical-scrollbar:hover {
+  background: var(--sub-color-level-2);
+}
+.tom-editor__virtical-scrollbar-area__virtical-scrollbar:active {
+  background: var(--sub-color-level-3);
+}
+.tom-editor__virtical-scrollbar-area__virtical-scrollbar--active {
+  display: block;
+}
