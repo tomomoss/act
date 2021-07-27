@@ -17,6 +17,14 @@ const matchKeyword = (keyword) => {
 };
 
 /**
+ * 特殊文字を元に戻します。
+ */
+const replaceAllSpecialCharacter = () => {
+  _.tokens[_.tokens.length - 1] = _.tokens[_.tokens.length - 1].replaceAll("&lt;", "<");
+  _.tokens[_.tokens.length - 1] = _.tokens[_.tokens.length - 1].replaceAll("&gt;", ">");
+};
+
+/**
  * 字句解析を実行します。
  * 当関数はモジュール外に出すため引数検査を実施しておきます。
  * @param {string} sourceCode 解析対象となるソースコードです。
@@ -173,6 +181,7 @@ const tokenize = (sourceCode, ...rest) => {
           if (stringToken.value[stringToken.value.length - 1] === _.keyword.stringTag) {
             stringToken.value = stringToken.value.slice(0, -1);
             _.tokens.push(stringToken);
+            replaceAllSpecialCharacter();
             continue;
           }
 
@@ -188,6 +197,7 @@ const tokenize = (sourceCode, ...rest) => {
             }
           }
           if (isClosed) {
+            replaceAllSpecialCharacter();
             continue;
           }
           throw new TranspileError(`${_.lineNumber}行目: 文字列が閉じられていません。`);
