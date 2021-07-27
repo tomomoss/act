@@ -96,7 +96,7 @@ const tokenize = (sourceCode, ...rest) => {
           _.index += _.keyword.linefeed.length;
           continue;
         }
-        index += 1;
+        _.index += 1;
       }
       if (isClosed) {
         continue;
