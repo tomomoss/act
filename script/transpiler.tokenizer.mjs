@@ -200,7 +200,7 @@ const tokenize = (sourceCode, ...rest) => {
       // 処理の区切りとなる忘れずに入れておきます。
       _.tokens.push({
         category: "system",
-        value: "\n"
+        value: "FUNCTION_END"
       });
 
       continue;
