@@ -54,6 +54,28 @@ const initializeAreasWidthRatioResizingProcess = () => {
 };
 
 /**
+ * 当アプリ起動時に流れるオープニングアニメーションを実装します。
+ */
+const initializeOpeningAnimationProcess = () => {
+
+  // まずは描画するアニメーションの下地となるcanvasタグを配置します。
+  const openingAnimationLayer = document.createElement("canvas");
+  openingAnimationLayer.classList.add("opening-animation-layer");
+  openingAnimationLayer.height = innerHeight;
+  openingAnimationLayer.width = innerWidth;
+  document.body.appendChild(openingAnimationLayer);
+
+  // 配置するのと同時にWeb Animations APIで背景を白から空色へフェードします。
+  // フェードが完了したら今度はCanvas APIによるアニメーションに移ります。
+  openingAnimationLayer.addEventListener("animationend", () => {
+    const context2D = openingAnimationLayer.getContext("2d");
+    context2D.lineCap = "round";
+    context2D.lineJoin = "round";
+    requestOpeningAnimationFrame(context2D);
+  });
+};
+
+/**
  * 当Webアプリの根幹であるトランスパイラに直接関係する処理を実装します。
  */
 const initializeTranspilerProcess = () => {
@@ -141,6 +163,95 @@ const popupMessage = (message, state) => {
 };
 
 /**
+ * Window.requestAnimationFrameメソッドを使用してオープニングアニメーションを描画していきます。
+ * @param {CanvasRenderingContext2D} context2D 2Dレンダリングコンテキストです。
+ */
+const requestOpeningAnimationFrame = (context2D) => {
+  const animationMinWidth = 960;
+  let overAnimationMinWidth;
+  let animationScale;
+  if (innerWidth < animationMinWidth) {
+    overAnimationMinWidth = 0;
+    animationScale = innerWidth / animationMinWidth;
+  } else {
+    overAnimationMinWidth = innerWidth - animationMinWidth;
+    animationScale = 1;
+  }
+
+  // まずはロゴのうち一筆書きでかける部分を描画します。
+  context2D.lineWidth = 3;
+  context2D.strokeStyle = "rgb(0, 51, 102)";
+  context2D.beginPath();
+  context2D.moveTo(-10, innerHeight / 100 * 50);
+  context2D.lineTo((320 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
+  context2D.lineTo((360 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 100 * animationScale);
+  context2D.lineTo((400 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
+  context2D.lineTo((560 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 100 * animationScale);
+  context2D.lineTo(innerWidth + 10, innerHeight / 100 * 50 - 100 * animationScale);
+  context2D.stroke();
+
+  // 「A」の横線を描画します。
+  context2D.beginPath();
+  context2D.moveTo((340 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 25 * animationScale);
+  context2D.lineTo((380 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 25 * animationScale);
+  context2D.stroke();
+
+  // 「T」の縦線を描画します。
+  context2D.beginPath();
+  context2D.moveTo((600 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 90 * animationScale);
+  context2D.lineTo((600 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
+  context2D.stroke();
+
+  // 「C」の上部分を描画します。
+  const gradient = context2D.createLinearGradient(
+    (430 + overAnimationMinWidth / 2) * animationScale,
+    innerHeight / 100 * 50 - 100 * animationScale,
+    (530 + overAnimationMinWidth / 2) * animationScale,
+    innerHeight / 100 * 50
+  );
+  gradient.addColorStop(0, "rgb(255, 153, 0)");
+  gradient.addColorStop(0.5, "rgb(255, 204, 0)");
+  gradient.addColorStop(1, "rgb(204, 102, 0)");
+  context2D.lineWidth = 5;
+  context2D.shadowColor = "rgb(255, 204, 0)";
+  context2D.shadowBlur = 5;
+  context2D.strokeStyle = gradient;
+  context2D.beginPath();
+  context2D.arc(
+    (480 + overAnimationMinWidth / 2) * animationScale,
+    innerHeight / 100 * 50 - 50 * animationScale,
+    50,
+    162 / 180 * Math.PI,
+    315 / 180 * Math.PI
+  );
+  context2D.arc(
+    (480 + overAnimationMinWidth / 2) * animationScale,
+    innerHeight / 100 * 50 - 50 * animationScale,
+    50,
+    315 / 180 * Math.PI,
+    238.5 / 180 * Math.PI,
+    true
+  );
+  context2D.lineTo(((480 + overAnimationMinWidth / 2) * animationScale) - 6, (innerHeight / 100 * 50 - 50 * animationScale) - 10);
+  context2D.stroke();
+
+  // 「C」の下部分を描画します。
+  context2D.beginPath();
+  context2D.arc(
+    (480 + overAnimationMinWidth / 2) * animationScale,
+    innerHeight / 100 * 50 - 50 * animationScale,
+    50,
+    45 / 180 * Math.PI,
+    135 / 180 * Math.PI
+  );
+  context2D.lineTo(((480 + overAnimationMinWidth / 2) * animationScale) + 6, (innerHeight / 100 * 50 - 50 * animationScale) + 10);
+  context2D.lineTo(((480 + overAnimationMinWidth / 2) * animationScale) + 26, (innerHeight / 100 * 50 - 50 * animationScale) + 42);
+  context2D.stroke();
+
+  return;
+};
+
+/**
  * エディター領域とトランスパイル結果領域の横幅を調整します。
  * @param {number} editorAreaWidthRatio エディター領域の横幅の割合です。
  */
@@ -159,5 +270,6 @@ _.subEditor = new TOMEditor(_.resultArea, {
   readonly: true
 });
 
+initializeOpeningAnimationProcess();
 initializeTranspilerProcess();
 initializeAreasWidthRatioResizingProcess();
