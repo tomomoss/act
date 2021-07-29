@@ -47,7 +47,7 @@ const drawOpeningAnimation = (openingAnimationLayer, context2D, logoDrawingRatio
 
   // アニメーションで描いていきます。
   if (logoDrawingRatio1 < 0.33) {
-    logoDrawingRatio1 *= 1.08;
+    logoDrawingRatio1 *= 1.07;
   } else if (logoDrawingRatio1 < 0.66) {
     logoDrawingRatio1 *= 1.05;
   } else {
@@ -81,7 +81,7 @@ const drawOpeningAnimation = (openingAnimationLayer, context2D, logoDrawingRatio
 
   // 第3段階です。
   if (logoDrawingRatio1 > 5) {
-    logoDrawingRatio3 += 0.006;
+    logoDrawingRatio3 += 0.007;
 
     // 「C」にかけるグラデーションです。
     const gradient = context2D.createLinearGradient(

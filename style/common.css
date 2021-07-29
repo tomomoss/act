@@ -71,6 +71,7 @@ html {
   margin: calc(var(--header_box-shadow_blur-radius) + var(--header_box-shadow_blur-radius)) 0 0.1rem;
 }
 .main--opening {
+  cursor: default;
   opacity: 0;
 }
 .main__areas-in-sub-editor--failed {
@@ -118,13 +119,13 @@ html {
   border-right: solid 0.1rem rgb(238, 238, 238);
 }
 .opening-animation-layer {
-  animation: opening-animation1 1s linear 0.5s forwards;
+  animation: opening-animation1 1s linear 0.25s forwards;
   height: 100%;
   position: fixed;
   width: 100%;
   z-index: 1;
 }
 .opening-animation-layer--fadeout {
-  animation: opening-animation2 1.5s ease-in 0.5s forwards;
+  animation: opening-animation2 1.5s ease-in forwards;
   background: rgb(221, 238, 255);
 }
