@@ -8,6 +8,239 @@ import {
 } from "./tom-editor/tom-editor.mjs";
 
 /**
+ * ACTロゴのうち一筆書きで描ける部分を描画します。
+ * @param {CanvasRenderingContext2D} context2D 描画に使用するコンテキストです。
+ * @param {number} animationScale アニメーションの縮尺です。
+ * @param {number} overAnimationMinWidth 最低限のアニメーション領域横幅から超えているピクセル量です。
+ * @param {number} logoDrawingRatio1 一筆書きで描ける部分の描画進行率です。
+ * @param {number} logoDrawingRatio2 Aの横線とTの縦線用の描画進行率です。
+ * @param {number} logoDrawingRatio3 Cの描画進行率です。
+ */
+const drawOpeningAnimation = (openingAnimationLayer, context2D, logoDrawingRatio1, logoDrawingRatio2, logoDrawingRatio3) => {
+  const animationMinWidth = 960;
+  let animationScale;
+  let overAnimationMinWidth;
+  if (innerWidth < animationMinWidth) {
+    animationScale = innerWidth / animationMinWidth;
+    overAnimationMinWidth = 0;
+  } else {
+    animationScale = 1;
+    overAnimationMinWidth = innerWidth - animationMinWidth;
+  }
+  context2D.clearRect(0, 0, innerWidth, innerHeight);
+
+  // まずはロゴのうち一筆書きでかける部分を描画します。
+  context2D.globalCompositeOperation = "source-over";
+  context2D.lineCap = "round";
+  context2D.lineJoin = "round";
+  context2D.lineWidth = 2 * animationScale;
+  context2D.shadowBlur = 0;
+  context2D.strokeStyle = "rgb(0, 51, 102)";
+  context2D.beginPath();
+  context2D.moveTo(-10, innerHeight / 100 * 50);
+  context2D.lineTo((320 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
+  context2D.lineTo((360 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 100 * animationScale);
+  context2D.lineTo((400 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
+  context2D.lineTo((560 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 100 * animationScale);
+  context2D.lineTo(innerWidth + 10, innerHeight / 100 * 50 - 100 * animationScale);
+  context2D.stroke();
+
+  // アニメーションで描いていきます。
+  if (logoDrawingRatio1 < 0.33) {
+    logoDrawingRatio1 *= 1.08;
+  } else if (logoDrawingRatio1 < 0.66) {
+    logoDrawingRatio1 *= 1.05;
+  } else {
+    logoDrawingRatio1 *= 1.02;
+  }
+  context2D.fillStyle = "rgb(0, 51, 102)";
+  context2D.globalCompositeOperation = "source-in";
+  context2D.beginPath();
+  context2D.fillRect(0, 0, innerWidth * logoDrawingRatio1, innerHeight);
+
+  // 第2段階です。
+  if (logoDrawingRatio1 > 1.5) {
+    logoDrawingRatio2 *= 1.1;
+    if (logoDrawingRatio2 > 1) {
+      logoDrawingRatio2 = 1.001;
+    }
+    context2D.globalCompositeOperation = "source-over";
+
+    // 「A」の横線を描画します。
+    context2D.beginPath();
+    context2D.moveTo((340 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 25 * animationScale);
+    context2D.lineTo((340 + overAnimationMinWidth / 2) * animationScale + (40 * animationScale) * logoDrawingRatio2, innerHeight / 100 * 50 - 25 * animationScale);
+    context2D.stroke();
+
+    // 「T」の縦線を描画します。
+    context2D.beginPath();
+    context2D.moveTo((600 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 90 * animationScale);
+    context2D.lineTo((600 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 90 * animationScale * (1 - logoDrawingRatio2));
+    context2D.stroke();
+  }
+
+  // 第3段階です。
+  if (logoDrawingRatio1 > 5) {
+    logoDrawingRatio3 += 0.006;
+
+    // 「C」にかけるグラデーションです。
+    const gradient = context2D.createLinearGradient(
+      (430 + overAnimationMinWidth / 2) * animationScale,
+      innerHeight / 100 * 50 - 100 * animationScale,
+      (530 + overAnimationMinWidth / 2) * animationScale,
+      innerHeight / 100 * 50
+    );
+    gradient.addColorStop(0, "rgb(255, 153, 0)");
+    gradient.addColorStop(0.5, "rgb(255, 204, 0)");
+    gradient.addColorStop(1, "rgb(204, 102, 0)");
+    context2D.globalCompositeOperation = "source-over";
+    context2D.lineWidth = 5 * animationScale;
+    context2D.shadowColor = "rgb(255, 204, 0)";
+    context2D.shadowBlur = 7 * animationScale;
+    context2D.strokeStyle = gradient;
+
+    // 以下、各部位の描画進捗率を表す値です。
+    let cTopFirstHalf;
+    if (logoDrawingRatio3 < 0.274) {
+      cTopFirstHalf = logoDrawingRatio3 / 0.274;
+    } else {
+      cTopFirstHalf = 1;
+    }
+    let cTopCenterBar;
+    let cTopSecondHalf;
+    if (logoDrawingRatio3 > 0.274) {
+      if (logoDrawingRatio3 < 0.5) {
+        cTopCenterBar = (logoDrawingRatio3 - 0.274) / 0.226;
+      } else {
+        cTopCenterBar = 1;
+      }
+      if (logoDrawingRatio3 < 0.548) {
+        cTopSecondHalf = (logoDrawingRatio3 - 0.274) / 0.274;
+      } else {
+        cTopSecondHalf = 1;
+      }
+    }
+    let cBottom;
+    if (logoDrawingRatio3 > 0.645) {
+      if (logoDrawingRatio3 < 1) {
+        cBottom = (logoDrawingRatio3 - 0.645) / 0.355;
+      } else {
+        cBottom = 1;
+      }
+    }
+    let cBottomBar1;
+    if (logoDrawingRatio3 > 0.645) {
+      if (logoDrawingRatio3 < 0.85) {
+        cBottomBar1 = (logoDrawingRatio3 - 0.645) / 0.205;
+      } else {
+        cBottomBar1 = 1;
+      }
+    }
+    let cBottomBar2;
+    if (logoDrawingRatio3 > 0.85) {
+      if (logoDrawingRatio3 < 1) {
+        cBottomBar2 = (logoDrawingRatio3 - 0.85) / 0.15;
+      } else {
+        cBottomBar2 = 1;
+      }
+    }
+
+    // 最初は「C」の上半分を描画します。
+    context2D.beginPath();
+    context2D.arc(
+      (480 + overAnimationMinWidth / 2) * animationScale,
+      innerHeight / 100 * 50 - 50 * animationScale,
+      50 * animationScale,
+      315 / 180 * Math.PI,
+      (238.5 + 76.5 * (1 - cTopFirstHalf)) / 180 * Math.PI,
+      true
+    );
+    context2D.stroke();
+
+    // 「C」の中央線です。
+    if (typeof cTopCenterBar !== "undefined") {
+      context2D.beginPath();
+      context2D.moveTo(
+        (((480 + overAnimationMinWidth / 2) * animationScale) - 26.1 * animationScale),
+        ((innerHeight / 100 * 50 - 50 * animationScale) - 42.3 * animationScale)
+      );
+      context2D.lineTo(
+        ((480 + overAnimationMinWidth / 2) * animationScale) - (6 + 20.1 * (1 - cTopCenterBar)) * animationScale,
+        (innerHeight / 100 * 50 - 50 * animationScale) - (10 + 32.3 * (1 - cTopCenterBar)) * animationScale
+      );
+      context2D.stroke();
+    }
+
+    // 「C」の後半部分です。
+    if (typeof cTopSecondHalf !== "undefined") {
+      context2D.beginPath();
+      context2D.arc(
+        (480 + overAnimationMinWidth / 2) * animationScale,
+        innerHeight / 100 * 50 - 50 * animationScale,
+        50 * animationScale,
+        238.5 / 180 * Math.PI,
+        (162 + 76.5 * (1 - cTopSecondHalf)) / 180 * Math.PI,
+        true
+      );
+      context2D.stroke();
+    }
+
+    // 次に「C」の下半分を描画します。
+    if (typeof cBottom !== "undefined") {
+      context2D.beginPath();
+      context2D.arc(
+        (480 + overAnimationMinWidth / 2) * animationScale,
+        innerHeight / 100 * 50 - 50 * animationScale,
+        50 * animationScale,
+        135 / 180 * Math.PI,
+        (36 + 99 * (1 - cBottom)) / 180 * Math.PI,
+        true
+      );
+      context2D.stroke();
+    }
+    if (typeof cBottomBar1 !== "undefined") {
+      context2D.beginPath();
+      context2D.moveTo(
+        ((480 + overAnimationMinWidth / 2) * animationScale) - 35.4 * animationScale,
+        (innerHeight / 100 * 50 - 50 * animationScale) + 35.4 * animationScale
+      );
+      context2D.lineTo(
+        ((480 + overAnimationMinWidth / 2) * animationScale) + (-35.4 + 41.4 * cBottomBar1) * animationScale,
+        (innerHeight / 100 * 50 - 50 * animationScale) + (35.4 - 25.4 * cBottomBar1) * animationScale
+      );
+      context2D.stroke();
+    }
+    if (typeof cBottomBar2 !== "undefined") {
+      context2D.beginPath();
+      context2D.lineTo(
+        ((480 + overAnimationMinWidth / 2) * animationScale) + 6 * animationScale,
+        (innerHeight / 100 * 50 - 50 * animationScale) + 10 * animationScale
+      );
+      context2D.lineTo(
+        ((480 + overAnimationMinWidth / 2) * animationScale) + (6 + 20 * cBottomBar2) * animationScale,
+        (innerHeight / 100 * 50 - 50 * animationScale) + (10 + 32 * cBottomBar2) * animationScale
+      );
+      context2D.stroke();
+    }
+  }
+
+  // 全部の描画が完了したらアニメーション処理から抜けます。
+  if (logoDrawingRatio3 > 1) {
+    document.querySelector(".header--opening").classList.remove("header--opening");
+    document.querySelector(".main--opening").classList.remove("main--opening");
+    openingAnimationLayer.classList.add("opening-animation-layer--fadeout");
+    openingAnimationLayer.addEventListener("animationend", () => {
+      openingAnimationLayer.remove();
+    });
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    drawOpeningAnimation(openingAnimationLayer, context2D, logoDrawingRatio1, logoDrawingRatio2, logoDrawingRatio3);
+  });
+};
+
+/**
  * 区切り線のドラッグ移動によるエディター領域とトランスパイル結果領域の横幅調整処理を実装します。
  */
 const initializeAreasWidthRatioResizingProcess = () => {
@@ -58,21 +291,28 @@ const initializeAreasWidthRatioResizingProcess = () => {
  */
 const initializeOpeningAnimationProcess = () => {
 
-  // まずは描画するアニメーションの下地となるcanvasタグを配置します。
+  // オープニングアニメーションを描画するcanvasタグをDOMツリーに挿入します。
+  // 挿入と同時に、Web Animations APIによる背景色のフェードアニメーションが起動します。
   const openingAnimationLayer = document.createElement("canvas");
   openingAnimationLayer.classList.add("opening-animation-layer");
   openingAnimationLayer.height = innerHeight;
   openingAnimationLayer.width = innerWidth;
   document.body.appendChild(openingAnimationLayer);
+  new ResizeObserver(() => {
+    openingAnimationLayer.height = innerHeight;
+    openingAnimationLayer.width = innerWidth;
+  }).observe(openingAnimationLayer);
 
-  // 配置するのと同時にWeb Animations APIで背景を白から空色へフェードします。
-  // フェードが完了したら今度はCanvas APIによるアニメーションに移ります。
-  openingAnimationLayer.addEventListener("animationend", () => {
+  // アニメーション終了と同時にロゴの描画を行います。
+  setTimeout(() => {
     const context2D = openingAnimationLayer.getContext("2d");
-    context2D.lineCap = "round";
-    context2D.lineJoin = "round";
-    requestOpeningAnimationFrame(context2D);
-  });
+
+    // アニメーションで描画します。
+    requestAnimationFrame(() => {
+      drawOpeningAnimation(openingAnimationLayer, context2D, 0.001, 0.075, 0);
+    });
+
+  }, parseFloat(getComputedStyle(openingAnimationLayer).animationDuration) * 1000 + parseFloat(getComputedStyle(openingAnimationLayer).animationDelay) * 1000);
 };
 
 /**
@@ -160,95 +400,6 @@ const popupMessage = (message, state) => {
   popupMessageWindow.addEventListener("animationend", () => {
     popupMessageWindow.remove();
   });
-};
-
-/**
- * Window.requestAnimationFrameメソッドを使用してオープニングアニメーションを描画していきます。
- * @param {CanvasRenderingContext2D} context2D 2Dレンダリングコンテキストです。
- */
-const requestOpeningAnimationFrame = (context2D) => {
-  const animationMinWidth = 960;
-  let overAnimationMinWidth;
-  let animationScale;
-  if (innerWidth < animationMinWidth) {
-    overAnimationMinWidth = 0;
-    animationScale = innerWidth / animationMinWidth;
-  } else {
-    overAnimationMinWidth = innerWidth - animationMinWidth;
-    animationScale = 1;
-  }
-
-  // まずはロゴのうち一筆書きでかける部分を描画します。
-  context2D.lineWidth = 3;
-  context2D.strokeStyle = "rgb(0, 51, 102)";
-  context2D.beginPath();
-  context2D.moveTo(-10, innerHeight / 100 * 50);
-  context2D.lineTo((320 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
-  context2D.lineTo((360 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 100 * animationScale);
-  context2D.lineTo((400 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
-  context2D.lineTo((560 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 100 * animationScale);
-  context2D.lineTo(innerWidth + 10, innerHeight / 100 * 50 - 100 * animationScale);
-  context2D.stroke();
-
-  // 「A」の横線を描画します。
-  context2D.beginPath();
-  context2D.moveTo((340 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 25 * animationScale);
-  context2D.lineTo((380 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 25 * animationScale);
-  context2D.stroke();
-
-  // 「T」の縦線を描画します。
-  context2D.beginPath();
-  context2D.moveTo((600 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50 - 90 * animationScale);
-  context2D.lineTo((600 + overAnimationMinWidth / 2) * animationScale, innerHeight / 100 * 50);
-  context2D.stroke();
-
-  // 「C」の上部分を描画します。
-  const gradient = context2D.createLinearGradient(
-    (430 + overAnimationMinWidth / 2) * animationScale,
-    innerHeight / 100 * 50 - 100 * animationScale,
-    (530 + overAnimationMinWidth / 2) * animationScale,
-    innerHeight / 100 * 50
-  );
-  gradient.addColorStop(0, "rgb(255, 153, 0)");
-  gradient.addColorStop(0.5, "rgb(255, 204, 0)");
-  gradient.addColorStop(1, "rgb(204, 102, 0)");
-  context2D.lineWidth = 5;
-  context2D.shadowColor = "rgb(255, 204, 0)";
-  context2D.shadowBlur = 5;
-  context2D.strokeStyle = gradient;
-  context2D.beginPath();
-  context2D.arc(
-    (480 + overAnimationMinWidth / 2) * animationScale,
-    innerHeight / 100 * 50 - 50 * animationScale,
-    50,
-    162 / 180 * Math.PI,
-    315 / 180 * Math.PI
-  );
-  context2D.arc(
-    (480 + overAnimationMinWidth / 2) * animationScale,
-    innerHeight / 100 * 50 - 50 * animationScale,
-    50,
-    315 / 180 * Math.PI,
-    238.5 / 180 * Math.PI,
-    true
-  );
-  context2D.lineTo(((480 + overAnimationMinWidth / 2) * animationScale) - 6, (innerHeight / 100 * 50 - 50 * animationScale) - 10);
-  context2D.stroke();
-
-  // 「C」の下部分を描画します。
-  context2D.beginPath();
-  context2D.arc(
-    (480 + overAnimationMinWidth / 2) * animationScale,
-    innerHeight / 100 * 50 - 50 * animationScale,
-    50,
-    45 / 180 * Math.PI,
-    135 / 180 * Math.PI
-  );
-  context2D.lineTo(((480 + overAnimationMinWidth / 2) * animationScale) + 6, (innerHeight / 100 * 50 - 50 * animationScale) + 10);
-  context2D.lineTo(((480 + overAnimationMinWidth / 2) * animationScale) + 26, (innerHeight / 100 * 50 - 50 * animationScale) + 42);
-  context2D.stroke();
-
-  return;
 };
 
 /**

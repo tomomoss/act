@@ -1,10 +1,20 @@
 @charset "UTF-8";
-@keyframes opening {
+@keyframes opening-animation1 {
   0% {
     background: rgb(255, 255, 255);
   }
   100% {
     background: rgb(221, 238, 255);
+  }
+}
+@keyframes opening-animation2 {
+  0% {
+    background: rgb(221, 238, 255);
+    opacity: 1;
+  }
+  100% {
+    background: rgba(221, 238, 255, 0);
+    opacity: 0;
   }
 }
 @keyframes popup-message-window {
@@ -108,11 +118,13 @@ html {
   border-right: solid 0.1rem rgb(238, 238, 238);
 }
 .opening-animation-layer {
-  /* animation: opening 1s 0.5s forwards; */
-  animation: opening 0.5s forwards;
+  animation: opening-animation1 1s linear 0.5s forwards;
   height: 100%;
   position: fixed;
-  text-align: center;
-  vertical-align: center;
   width: 100%;
+  z-index: 1;
+}
+.opening-animation-layer--fadeout {
+  animation: opening-animation2 1.5s ease-in 0.5s forwards;
+  background: rgb(221, 238, 255);
 }
