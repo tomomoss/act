@@ -29,15 +29,15 @@ const TOMEditor = class {
   /**
    * エディターを初期化します。
    * 当コンストラクタは外部に露出するため引数検査を実施します。
-   * @param {Element} editorContainer エディター機能を実装するHTML要素です。
+   * @param {Element} tomEditorContainer エディター機能を実装するHTML要素です。
    * @param {object} option エディターの挙動を制御する引数です。省略可能です。
    * @param {...any} rest 引数検査のためだけに存在する引数です。
    */
-  constructor(editorContainer, option, ...rest) {
-    if (typeof editorContainer === "undefined") {
+  constructor(tomEditorContainer, option, ...rest) {
+    if (typeof tomEditorContainer === "undefined") {
       throw new Error("第1引数が指定されていません。");
     }
-    if (!(editorContainer instanceof Element)) {
+    if (!(tomEditorContainer instanceof Element)) {
       throw new Error("第1引数がHTML要素ではありません。");
     }
     if (typeof option === "object") {
@@ -58,11 +58,14 @@ const TOMEditor = class {
     }
     Object.seal(this);
 
+    // 1つのHTML要素の直下にTOM Editorが複数実装されないように、実装前に当該HTML要素の内容を消去します。
+    tomEditorContainer.innerHTML = "";
+
     // エディター本体のラッパー要素です。
     // これがないと入力内容によってエディターの実際の寸法が変化したときに見た目の寸法も変化してしまいます。
     const editorWrapper = document.createElement("div");
     editorWrapper.classList.add("tom-editor__editor-wrapper");
-    editorContainer.appendChild(editorWrapper);
+    tomEditorContainer.appendChild(editorWrapper);
 
     // エディター本体を初期化します。
     this.root = document.createElement("div");
@@ -297,6 +300,11 @@ const TOMEditor = class {
 
       // 入力処理後はShiftキーフラグを非活性化状態にします。
       this.textArea.duringSelectionRange = false;
+
+      // Tabキーが押されたときはフォーカス位置の移動が発生しないようにします。
+      if (event.key === "Tab") {
+        event.preventDefault();
+      }
     });
 
     // 日本語入力用の処理です。
@@ -649,7 +657,12 @@ const TOMEditor = class {
       [event.key === "Delete", this.textArea.removeCharacter, "Delete"],
       [event.key === "End", this.textArea.resetFocusAndSelectionRange, "End"],
       [event.key === "Enter", this.textArea.appendTextLine, undefined],
-      [event.key === "Home", this.textArea.resetFocusAndSelectionRange, "Home"]
+      [event.key === "Home", this.textArea.resetFocusAndSelectionRange, "Home"],
+      [event.key === "Tab", () => {
+        for (let i = 0; i < 4; i += 1) {
+          this.textArea.appendCharacter(" ");
+        }
+      }, undefined]
     ]) {
       if (condition) {
         method(argument);
