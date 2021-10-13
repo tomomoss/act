@@ -1,0 +1,107 @@
+@charset "UTF-8";
+
+:root {
+
+  /* ACTのテーマカラーのうち明るい色です。 */
+  --blight-theme-color: rgb(153, 204, 255);
+
+  /* ACTのテーマカラーのうち最も暗い色です。 */
+  --dark-theme-color: rgb(0, 51, 102);
+
+  /* fontプロパティの標準値です。 */
+  --default-font: normal .85rem/.85rem Consolas, "Courier New", monospace;
+
+  /* ヘッダーの垂直方向の影のぼかし面積です。 */
+  --header-box-shadow-blur-radius: .1rem;
+
+  /* ヘッダーの垂直方向の影のオフセット距離です。 */
+  --header-box-shadow-offset-y: .1rem;
+
+  /* ACTのテーマカラーのうち最も明るい色です。 */
+  --pale-theme-color: rgb(221, 238, 255);
+
+  /* ACTのテーマカラーのうち最も鮮やかな色です。 */
+  --vivid-theme-color: rgb(51, 153, 255);
+}
+
+body {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100vh;
+  margin: 0;
+  width: 100vw;
+}
+
+.footer {
+  align-items: center;
+  background: var(--dark-theme-color);
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+}
+.footer__console {
+  color: var(--pale-theme-color);
+  font: var(--default-font);
+  margin: .25rem;
+}
+.footer__download-button {
+  background: transparent;
+  border: none;
+  border-left: .1rem solid var(--pale-theme-color);
+  color: var(--pale-theme-color);
+  cursor: pointer;
+  font: var(--default-font);
+  margin: .25rem 0 .25rem .25rem;
+  padding: .25rem .5rem;
+}
+.footer__download-button:hover {
+  color: var(--blight-theme-color);
+}
+.header {
+  align-items: center;
+  background: var(--pale-theme-color);
+  box-shadow: 0 var(--header-box-shadow-offset-y) var(--header-box-shadow-blur-radius) rgb(204, 221, 238);
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+}
+.header__external-link {
+  border-left: .1rem solid var(--dark-theme-color);
+  color: var(--dark-theme-color);
+  display: block;
+  font: var(--default-font);
+  margin: .25rem 0;
+  padding: .25rem .5rem;
+  text-decoration: none;
+}
+.header__external-link:hover {
+  color: var(--vivid-theme-color);
+}
+.header__nav {
+  display: flex;
+}
+.header__title {
+  color: var(--dark-theme-color);
+  font: var(--default-font);
+  margin: .25rem .5rem;
+}
+.main {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: space-between;
+  margin: calc(var(--header-box-shadow-offset-y) + var(--header-box-shadow-blur-radius)) 0 .1rem;
+}
+.main__editor-container {
+  flex: 1 1 auto;
+}
+.main__separator {
+  background: rgb(238, 238, 238);
+  border-left: .1rem solid rgb(255, 255, 255);
+  border-right: .1rem solid rgb(255, 255, 255);
+  cursor: col-resize;
+  flex: 0 0 .1rem;
+}
+.main__separator:hover {
+  border-left-color: rgb(238, 238, 238);
+  border-right-color: rgb(238, 238, 238);
+}
