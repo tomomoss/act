@@ -19,20 +19,14 @@ const implementSystemThatChangeEditorsWidthByDragging = () => {
   // ドラッグ操作中であることを視覚的に表現するためのHTML要素です。
   // ドラッグ操作中は<body>タグ直下に挿入するかたちで利用します。
   const layer = document.createElement("div");
-  layer.style.cursor = "col-resize";
-  layer.style.height = "100vh";
-  layer.style.position = "absolute";
-  layer.style.width = "100vw";
-  layer.style.zIndex = "1";
+  layer.classList.add("layer-of-col-resize");
 
   // 区切り線をクリックすると横幅変更処理状態に入ったことを使用者に知らせるために区切り線の色を変更するとともに、
   // ドラッグ操作中であることを視覚的に表現するためのHTML要素を挿入します。
   separator.addEventListener("mousedown", (event) => {
     event.preventDefault();
     document.body.appendChild(layer);
-    separator.style.background = "var(--pale-theme-color)";
-    separator.style.borderLeftColor = "var(--pale-theme-color)";
-    separator.style.borderRightColor = "var(--pale-theme-color)";
+    separator.classList.add("main__separator--dragging");
   });
 
   // Webページ上でマウスカーソルを移動させたとき、横幅変更処理状態のフラグが立っているならば当該処理を実行します。
@@ -50,9 +44,38 @@ const implementSystemThatChangeEditorsWidthByDragging = () => {
   // ドラッグ操作中であることを視覚的に表現するためのHTML要素を除外します。
   window.addEventListener("mouseup", () => {
     layer.remove();
-    separator.style.background = "var(--separator-color)";
-    separator.style.borderLeftColor = "rgb(255, 255, 255)";
-    separator.style.borderRightColor = "rgb(255, 255, 255)";
+    separator.classList.remove("main__separator--dragging");
+  });
+};
+
+/**
+ * トランスパイルされたソースコードをファイルに格納してダウンロードする処理を実装します。
+ */
+const implementSystemThatDownloadFile = () => {
+
+  // ダウンロード処理を実行するたびに<a>タグが作られないようにEventTarget.addEventListenerメソッドの外側で作成しておきます。
+  const anchorTag = document.createElement("a");
+  anchorTag.download = "act.bat";
+
+  const downloadButton = document.querySelector(".footer__download-button");
+  downloadButton.addEventListener("mousedown", () => {
+    popupDonwloadProcessWindow();
+    if (!_transpileResult_.success) {
+      return;
+    }
+
+    // ライブラリ「encoding.js」を使用してShift JISに変換してからダウンロード処理を実行します。
+    const utf16List = [];
+    for (let i = 0; i < _transpileResult_.value.length; i += 1) {
+      utf16List.push(_transpileResult_.value.charCodeAt(i));
+    }
+    const characterEncodingBeforeConvert = Encoding.detect(_transpileResult_.value);
+    const shiftjisList = Encoding.convert(utf16List, "SJIS", characterEncodingBeforeConvert);
+    anchorTag.href = URL.createObjectURL(new Blob([new Uint8Array(shiftjisList)], {
+      type: "text/plain"
+    }));
+    anchorTag.dispatchEvent(new MouseEvent("click"))
+    URL.revokeObjectURL(anchorTag.href);
   });
 };
 
@@ -74,11 +97,35 @@ const implementSystemThatTranspile = () => {
   };
 };
 
+/**
+ * ダウンロード処理の状態・状況を知らせるウィンドウを表示します。
+ */
+const popupDonwloadProcessWindow = () => {
+  const popupWindow = document.createElement("div");
+  popupWindow.classList.add("popup-window");
+  if (_transpileResult_.success) {
+    popupWindow.classList.add("popup-window--success");
+    popupWindow.textContent = "トランスパイル正常: ダウンロードを開始します。";
+  } else {
+    popupWindow.classList.add("popup-window--failure");
+    popupWindow.textContent = "トランスパイル異常: 構文エラーが発生しています。ダウンロードは構文エラーを修正してから再実行してください。";
+  }
+  document.body.appendChild(popupWindow);
+  popupWindow.addEventListener("animationend", () => {
+    popupWindow.remove();
+  });
+};
+
 // 入力用エディターの実装対象となるHTML要素です。
 const _inputEditorContainer_ = document.querySelector(".main__input-editor-container");
 
 // 出力用エディターの実装対象となるHTML要素です。
 const _outputEditorContainer_ = document.querySelector(".main__output-editor-container");
 
-implementSystemThatTranspile();
+// トランスパイル結果です。
+let _transpileResult_;
+
+// 初期化順は順不同で問題ありません。
 implementSystemThatChangeEditorsWidthByDragging();
+implementSystemThatDownloadFile();
+implementSystemThatTranspile();
