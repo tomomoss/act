@@ -20,6 +20,9 @@
   /* ACTのテーマカラーのうち最も明るい色です。 */
   --pale-theme-color: rgb(221, 238, 255);
 
+  /* エディター間の区切り線の色です。 */
+  --separator-color: rgb(238, 238, 238);
+
   /* ACTのテーマカラーのうち最も鮮やかな色です。 */
   --vivid-theme-color: rgb(51, 153, 255);
 }
@@ -92,16 +95,12 @@ body {
   margin: calc(var(--header-box-shadow-offset-y) + var(--header-box-shadow-blur-radius)) 0 .1rem;
 }
 .main__editor-container {
-  flex: 1 1 auto;
+  flex: 1 1 50%;
 }
 .main__separator {
-  background: rgb(238, 238, 238);
+  background: var(--separator-color);
   border-left: .1rem solid rgb(255, 255, 255);
   border-right: .1rem solid rgb(255, 255, 255);
   cursor: col-resize;
   flex: 0 0 .1rem;
-}
-.main__separator:hover {
-  border-left-color: rgb(238, 238, 238);
-  border-right-color: rgb(238, 238, 238);
 }
