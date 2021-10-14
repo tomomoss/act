@@ -1,9 +1,12 @@
 import {
-  TOMEditor
-} from "./tom-editor.mjs";
-import {
   Encoding
 } from "./encoding.min.mjs";
+import {
+  playOpeningAnimation
+} from "./opening-animation.mjs";
+import {
+  TOMEditor
+} from "./tom-editor.mjs";
 
 /**
  * ドラッグ操作で入力用エディターと出力用エディターの横幅の割合を変更する一連の処理を実装します。
@@ -124,6 +127,8 @@ const _outputEditorContainer_ = document.querySelector(".main__output-editor-con
 
 // トランスパイル結果です。
 let _transpileResult_;
+
+playOpeningAnimation();
 
 // 初期化順は順不同で問題ありません。
 implementSystemThatChangeEditorsWidthByDragging();
