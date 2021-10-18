@@ -13,6 +13,8 @@
   "scripts": {
     "build": "webpack",
     "test": "jest",
+    "test:parser": "jest ./test/parser.test.ts",
+    "test:tokenizer": "jest ./test/tokenizer.test.ts",
     "watch": "webpack --watch"
   }
 }
