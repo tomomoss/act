@@ -1,4 +1,7 @@
 import {
+  transpile
+} from "../dist/act.mjs";
+import {
   Encoding
 } from "./encoding.min.mjs";
 import {
@@ -39,8 +42,8 @@ const implementSystemThatChangeEditorsWidthByDragging = () => {
     }
     const newInputEditorWidth = event.pageX;
     const newOutputEditorWidth = editorsWrapper.clientWidth - separator.offsetWidth - event.pageX;
-    _inputEditorContainer_.style.flexBasis = `${newInputEditorWidth / (newInputEditorWidth + newOutputEditorWidth) * 100}%`;
-    _outputEditorContainer_.style.flexBasis = `${newOutputEditorWidth / (newInputEditorWidth + newOutputEditorWidth) * 100}%`;
+    _inputEditorContainer.style.flexBasis = `${newInputEditorWidth / (newInputEditorWidth + newOutputEditorWidth) * 100}%`;
+    _outputEditorContainer.style.flexBasis = `${newOutputEditorWidth / (newInputEditorWidth + newOutputEditorWidth) * 100}%`;
   });
 
   // クリックから指を離されたときは横幅変更処理状態から抜けたことを使用者に知らせるために区切り線の色を変更します。
@@ -63,16 +66,16 @@ const implementSystemThatDownloadFile = () => {
   const downloadButton = document.querySelector(".footer__download-button");
   downloadButton.addEventListener("mousedown", () => {
     popupDonwloadProcessWindow();
-    if (!_transpileResult_.success) {
+    if (!_transpileResult.success) {
       return;
     }
 
     // ライブラリ「encoding.js」を使用してShift JISに変換してからダウンロード処理を実行します。
     const utf16List = [];
-    for (let i = 0; i < _transpileResult_.value.length; i += 1) {
-      utf16List.push(_transpileResult_.value.charCodeAt(i));
+    for (let i = 0; i < _transpileResult.value.length; i += 1) {
+      utf16List.push(_transpileResult.value.charCodeAt(i));
     }
-    const characterEncodingBeforeConvert = Encoding.detect(_transpileResult_.value);
+    const characterEncodingBeforeConvert = Encoding.detect(_transpileResult.value);
     const shiftjisList = Encoding.convert(utf16List, "SJIS", characterEncodingBeforeConvert);
     anchorTag.href = URL.createObjectURL(new Blob([new Uint8Array(shiftjisList)], {
       type: "text/plain"
@@ -89,15 +92,29 @@ const implementSystemThatDownloadFile = () => {
 const implementSystemThatTranspile = () => {
 
   // 入力用・出力用のエディターをWebページ上に配置します。
-  const inputEditor = new TOMEditor(_inputEditorContainer_, {
+  const inputEditor = new TOMEditor(_inputEditorContainer, {
     autofocus: true
   });
-  const outputEditor = new TOMEditor(_outputEditorContainer_, {
+  const outputEditor = new TOMEditor(_outputEditorContainer, {
     readonly: true
   });
+
+  // 入力用エディターに入力があるたびにトランスパイル処理を実行し、その結果をUIに反映します。
+  const transpilerConsole = document.querySelector(".footer__console");
   inputEditor.valueObserver = (value) => {
-    outputEditor.value = value;
+    _transpileResult = transpile(value);
+    if (_transpileResult.success) {
+      outputEditor.value = _transpileResult.value;
+      transpilerConsole.innerText = "";
+      return;
+    }
+    transpilerConsole.innerText = `[Error] ${_transpileResult.value.row}行, ${_transpileResult.value.column}列: ${_transpileResult.value.message}`;
   };
+
+  // 初期化しておきます。
+  _transpileResult = transpile("");
+  outputEditor.value = _transpileResult.value;
+  transpilerConsole.innerText = "";
 };
 
 /**
@@ -106,7 +123,7 @@ const implementSystemThatTranspile = () => {
 const popupDonwloadProcessWindow = () => {
   const popupWindow = document.createElement("div");
   popupWindow.classList.add("popup-window");
-  if (_transpileResult_.success) {
+  if (_transpileResult.success) {
     popupWindow.classList.add("popup-window--success");
     popupWindow.textContent = "トランスパイル正常: ダウンロードを開始します。";
   } else {
@@ -120,13 +137,13 @@ const popupDonwloadProcessWindow = () => {
 };
 
 // 入力用エディターの実装対象となるHTML要素です。
-const _inputEditorContainer_ = document.querySelector(".main__input-editor-container");
+const _inputEditorContainer = document.querySelector(".main__input-editor-container");
 
 // 出力用エディターの実装対象となるHTML要素です。
-const _outputEditorContainer_ = document.querySelector(".main__output-editor-container");
+const _outputEditorContainer = document.querySelector(".main__output-editor-container");
 
 // トランスパイル結果です。
-let _transpileResult_;
+let _transpileResult;
 
 playOpeningAnimation();
 

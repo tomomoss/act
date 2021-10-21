@@ -1,4 +1,18 @@
 @charset "UTF-8";
+@keyframes popup-window {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
 :root {
 
@@ -6,7 +20,13 @@
   --dark-theme-color: rgb(0, 51, 102);
 
   /* fontプロパティの標準値です。 */
-  --default-font: normal .85rem/.85rem Consolas, "Courier New", monospace;
+  --default-font: normal .85rem/var(--default-line-height) Consolas, "Courier New", monospace;
+
+  /* line-heightプロパティの標準値です。 */
+  --default-line-height: 1rem;
+
+  /* フッター内要素の垂直方向のmarginプロパティ値です。 */
+  --footer-items-vertical-margin: .25rem;
 
   /* ACTのテーマカラーのうち彩度が低くかつ暗い色です。 */
   --grayish-theme-color: rgb(153, 170, 187);
@@ -45,7 +65,7 @@
   color: var(--pale-theme-color);
   flex: 1 1 auto;
   font: var(--default-font);
-  margin: .25rem;
+  margin: var(--footer-items-vertical-margin);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -58,7 +78,7 @@
   cursor: pointer;
   flex: 0 0 auto;
   font: var(--default-font);
-  margin: .25rem 0 .25rem .25rem;
+  margin: var(--footer-items-vertical-margin) 0 var(--footer-items-vertical-margin) .25rem;
   padding: .25rem .5rem;
 }
 .footer__download-button:hover {
@@ -126,4 +146,21 @@
   position: fixed;
   width: 100vw;
   z-index: 1;
+}
+.popup-window {
+  animation: popup-window 4s linear;
+  bottom: calc(var(--default-line-height) + var(--footer-items-vertical-margin) * 2 + 1rem);
+  font: var(--default-font);
+  left: .5rem;
+  padding: .25rem .5rem;
+  position: absolute;
+  right: .5rem;
+  z-index: 1;
+}
+.popup-window--failure {
+  background: rgb(255, 221, 238);
+}
+.popup-window--success {
+  background: var(--pale-theme-color);
+  box-shadow: 0 var(--header-box-shadow-offset-y) var(--header-box-shadow-blur-radius) rgb(204, 221, 238);
 }

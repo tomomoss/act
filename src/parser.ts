@@ -110,9 +110,9 @@ const parseCalculationExpression = (): boolean => {
     if (isUnaryOperator(_tokenList[_index])) {
       if (binaryOperatorTokenIndex !== null && _tokenList[_index].row !== rowBeforeProcess) {
         throw new TranspileError(
-          parsedTokenList[binaryOperatorTokenIndex].row,
-          parsedTokenList[binaryOperatorTokenIndex].column,
-          `${parsedTokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
+          _tokenList[binaryOperatorTokenIndex].row,
+          _tokenList[binaryOperatorTokenIndex].column,
+          `${_tokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
         );
       }
       parsedTokenList.push(_tokenList[_index]);
@@ -120,14 +120,21 @@ const parseCalculationExpression = (): boolean => {
     }
 
     // 最後に被演算子を抽出します。
+    if (binaryOperatorTokenIndex !== null && !parsing()) {
+      throw new TranspileError(
+        _tokenList[binaryOperatorTokenIndex].row,
+        _tokenList[binaryOperatorTokenIndex].column,
+        `${_tokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
+      );
+    }
     
     // 数値リテラル用の抽出処理です。
     if (isNumberLiteral(_tokenList[_index])) {
       if (binaryOperatorTokenIndex !== null && _tokenList[_index].row !== rowBeforeProcess) {
         throw new TranspileError(
-          parsedTokenList[binaryOperatorTokenIndex].row,
-          parsedTokenList[binaryOperatorTokenIndex].column,
-          `${parsedTokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
+          _tokenList[binaryOperatorTokenIndex].row,
+          _tokenList[binaryOperatorTokenIndex].column,
+          `${_tokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
         );
       }
       parsedTokenList.push(_tokenList[_index]);
@@ -139,9 +146,9 @@ const parseCalculationExpression = (): boolean => {
     if (_tokenList[_index].value === keyword.groupingOperator.openingTag) {      
       if (binaryOperatorTokenIndex !== null && _tokenList[_index].row !== rowBeforeProcess) {
         throw new TranspileError(
-          parsedTokenList[binaryOperatorTokenIndex].row,
-          parsedTokenList[binaryOperatorTokenIndex].column,
-          `${parsedTokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
+          _tokenList[binaryOperatorTokenIndex].row,
+          _tokenList[binaryOperatorTokenIndex].column,
+          `${_tokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
         );
       }
       numberOfOpeningGroup += 1;
@@ -154,9 +161,9 @@ const parseCalculationExpression = (): boolean => {
     if (_tokenList[_index].value === keyword.groupingOperator.closingTag) {      
       if (binaryOperatorTokenIndex !== null && _tokenList[_index].row !== rowBeforeProcess) {
         throw new TranspileError(
-          parsedTokenList[binaryOperatorTokenIndex].row,
-          parsedTokenList[binaryOperatorTokenIndex].column,
-          `${parsedTokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
+          _tokenList[binaryOperatorTokenIndex].row,
+          _tokenList[binaryOperatorTokenIndex].column,
+          `${_tokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
         );
       }
       numberOfOpeningGroup -= 1;
@@ -170,16 +177,15 @@ const parseCalculationExpression = (): boolean => {
       break;
     }
     throw new TranspileError(
-      parsedTokenList[binaryOperatorTokenIndex].row,
-      parsedTokenList[binaryOperatorTokenIndex].column,
-      `${parsedTokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
+      _tokenList[binaryOperatorTokenIndex].row,
+      _tokenList[binaryOperatorTokenIndex].column,
+      `${_tokenList[binaryOperatorTokenIndex].value}演算子の右辺被演算子が見つかりません。`
     );
   }
   if (parsedTokenList.length === 0) {
     return false;
   }
   if (numberOfOpeningGroup > 0) {
-    console.log(_index, numberOfOpeningGroup);
     throw new TranspileError(
       parsedTokenList[parsedTokenList.length - 1].row,
       parsedTokenList[parsedTokenList.length - 1].column + parsedTokenList[parsedTokenList.length - 1].value.length,
@@ -215,45 +221,44 @@ const parseCalculationStatement = (): boolean => {
  * @returns {boolean} 処理を実行したときはtrueを返します。
  */
 const parseEchoFunctionStatement = (): boolean => {
-  if (_tokenList[_index].value !== "echo") {
+  if (!parsing() || _tokenList[_index].value !== "echo") {
     return false;
   }
+  const indexOfFunctionToken = _tokenList[_index].index;
   const rowOfFunctionToken = _tokenList[_index].row;
   _index += 1;
 
-  // 引数が指定されているか、指定されているならばその構文は正しいかを検査します。
-  if (!parsing() || _tokenList[_index].row !== rowOfFunctionToken) {
+  // 引数を求めます。
+  // まだ字句解析が終わっておらず、かつ、関数名の次の字句が関数名と同じ行にある場合は引数なので抽出します。
+  if (parsing() && _tokenList[_index].row === rowOfFunctionToken) {
 
-    // 引数が指定されていないならば改行だけします。
-    _transpiledSourceCode += "ECHO;\n";
+    // 引数の抽出には計算式用の構文処理を利用します。
+    // その構文解析処理に失敗したということは、引数として有効でない値が関数の引数部分に記述されているということなのでトランスパイルエラーとします。
+    if (!parseCalculationExpression()) {
+      throwUnexpectedTokenError();
+    }
 
+    // 引数は半角区切りで指定するのですが、その都合上計算式は必ずグループ演算子で囲まれている必要があります。
+    // 計算式が登場した以上、現在の構文解析位置は関数の位置より3つ以上大きくなっているはずです。
+    // なぜならばグループ演算子の開閉記号と値1つだけで3つあるからです。
+    // その状況で1つ直前の字句がグループ演算子の閉じ記号でない場合はグループ演算子を付けずに数式を記述したというわけで、
+    // しかも、echo関数は第1引数のみを許容するため引数の数が不正であるというエラーを生じさせます。
+    if (_index > indexOfFunctionToken + 2 && _tokenList[_index - 1].value !== keyword.groupingOperator.closingTag) {
+      throw new TranspileError(_tokenList[indexOfFunctionToken + 1].row, _tokenList[indexOfFunctionToken + 1].column, "引数の数が不正です。");
+    }
+
+    // さらに、この状況で関数名と同じ行に字句が存在していた場合も引数の数のエラーとします。
+    if (parsing() && _tokenList[_index].row === rowOfFunctionToken) {
+      throw new TranspileError(_tokenList[_index].row, _tokenList[_index].column, "引数の数が不正です。");
+    }
+
+    // ここまでの検査を全て突破した場合は正常に引数を構文解析できたと見なします。
+    _transpiledSourceCode += "SET act.@argument1=%act.@exit%\nECHO %act.@argument1%\n";
     return true;
   }
 
-  // 引数は半角空白で区切りますが、その仕様のために計算式はそのまま記述できずグループ演算子で囲む必要があります。
-  // なお、当該計算式を囲むグループ演算子はトランスパイルされたソースコードに含める必要はありません。
-  if (_tokenList[_index].value === keyword.groupingOperator.openingTag) {
-    _index += 1;
-    if (!parseCalculationExpression()) {
-      return false;
-    }
-    if (_tokenList[_index].value !== keyword.groupingOperator.closingTag) {
-      throwGroupError();
-    }
-    _index += 1;
-  } else if (isNumberLiteral(_tokenList[_index])) {
-    _transpiledSourceCode += `SET /A act.@exit=${_tokenList[_index].value}\n`;
-    _index += 1;
-  } else {
-    throw new TranspileError(_tokenList[_index].row, _tokenList[_index].column, "不正な引数です。");
-  }
-
-  // echo関数は第2引数を受けつけません。
-  if (_tokenList[_index]?.row === rowOfFunctionToken) {
-    throw new TranspileError(_tokenList[_index].row, _tokenList[_index].column, "引数の数が不正です。");
-  }
-
-  _transpiledSourceCode += "SET act.@argument1=%act.@exit%\nECHO %act.@argument1%\n";
+  // 引数がない場合は改行だけします。
+  _transpiledSourceCode += "ECHO;\n";
   return true;
 };
 
@@ -280,6 +285,9 @@ const throwGroupError = (): void => {
  * 予期しない字句と遭遇したとき用の例外処理を実行します。
  */
 const throwUnexpectedTokenError = (): void => {
+  if (typeof _tokenList[_index] === "undefined") {
+    throw new TranspileError(_tokenList[_index - 1].row, _tokenList[_index - 1].column, "予期しない字句です。");
+  }
   throw new TranspileError(_tokenList[_index].row, _tokenList[_index].column, "予期しない字句です。");
 };
 

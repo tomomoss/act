@@ -27,7 +27,7 @@ const transpile = (sourceCode: string): TranspileResult => {
   } catch (error) {
     if (error instanceof TranspileError) {
       return {
-        success: true,
+        success: false,
         value: error
       };
     }
