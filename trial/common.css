@@ -1,0 +1,166 @@
+@charset "UTF-8";
+@keyframes popup-window {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+:root {
+
+  /* ACTのテーマカラーのうち最も暗い色です。 */
+  --dark-theme-color: rgb(0, 51, 102);
+
+  /* fontプロパティの標準値です。 */
+  --default-font: normal .85rem/var(--default-line-height) Consolas, "Courier New", monospace;
+
+  /* line-heightプロパティの標準値です。 */
+  --default-line-height: 1rem;
+
+  /* フッター内要素の垂直方向のmarginプロパティ値です。 */
+  --footer-items-vertical-margin: .25rem;
+
+  /* ACTのテーマカラーのうち彩度が低くかつ暗い色です。 */
+  --grayish-theme-color: rgb(153, 170, 187);
+
+  /* ヘッダーの垂直方向の影のぼかし面積です。 */
+  --header-box-shadow-blur-radius: .1rem;
+
+  /* ヘッダーの垂直方向の影のオフセット距離です。 */
+  --header-box-shadow-offset-y: .1rem;
+
+  /* ACTのテーマカラーのうち最も明るい色です。 */
+  --pale-theme-color: rgb(221, 238, 255);
+
+  /* エディター間の区切り線の色です。 */
+  --separator-color: rgb(238, 238, 238);
+
+  /* ACTのテーマカラーのうち最も鮮やかな色です。 */
+  --vivid-theme-color: rgb(51, 153, 255);
+}
+
+.body {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100vh;
+  margin: 0;
+  user-select: none;
+  width: 100vw;
+}
+.footer {
+  align-items: center;
+  background: var(--dark-theme-color);
+  display: flex;
+  flex: 0 0 auto;
+}
+.footer__console {
+  color: var(--pale-theme-color);
+  flex: 1 1 auto;
+  font: var(--default-font);
+  margin: var(--footer-items-vertical-margin);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.footer__download-button {
+  background: transparent;
+  border: none;
+  border-left: .1rem solid var(--pale-theme-color);
+  color: var(--pale-theme-color);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: var(--default-font);
+  margin: var(--footer-items-vertical-margin) 0 var(--footer-items-vertical-margin) .25rem;
+  padding: .25rem .5rem;
+}
+.footer__download-button:hover {
+  color: var(--grayish-theme-color);
+}
+.header {
+  align-items: center;
+  background: var(--pale-theme-color);
+  box-shadow: 0 var(--header-box-shadow-offset-y) var(--header-box-shadow-blur-radius) rgb(204, 221, 238);
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+}
+.header__external-link {
+  border-left: .1rem solid var(--dark-theme-color);
+  color: var(--dark-theme-color);
+  display: block;
+  font: var(--default-font);
+  margin: .25rem 0;
+  padding: .25rem .5rem;
+  text-decoration: none;
+}
+.header__external-link:hover {
+  color: var(--vivid-theme-color);
+}
+.header__nav {
+  display: flex;
+}
+.header__title {
+  color: var(--dark-theme-color);
+  font: var(--default-font);
+  margin: .25rem .5rem;
+}
+.layer-of-col-resize {
+  cursor: col-resize;
+  height: 100vh;
+  position: fixed;
+  width: 100vw;
+  z-index: 1;
+}
+.main {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: space-between;
+  margin: calc(var(--header-box-shadow-offset-y) + var(--header-box-shadow-blur-radius)) 0 .1rem;
+}
+.main__editor-container {
+  flex: 1 1 50%;
+}
+.main__separator {
+  background: var(--separator-color);
+  border-left: .1rem solid rgb(255, 255, 255);
+  border-right: .1rem solid rgb(255, 255, 255);
+  cursor: col-resize;
+  flex: 0 0 .1rem;
+}
+.main__separator--dragging {
+  background: var(--pale-theme-color);
+  border-left-color: var(--pale-theme-color);
+  border-right-color: var(--pale-theme-color);
+}
+.opening-animation-layer {
+  background: rgb(255, 255, 255);
+  height: 100vh;
+  position: fixed;
+  width: 100vw;
+  z-index: 2;
+}
+.popup-window {
+  animation: popup-window 4s linear;
+  bottom: calc(var(--default-line-height) + var(--footer-items-vertical-margin) * 2 + 1rem);
+  font: var(--default-font);
+  left: .5rem;
+  padding: .25rem .5rem;
+  position: absolute;
+  right: .5rem;
+  z-index: 1;
+}
+.popup-window--failure {
+  background: rgb(255, 221, 238);
+}
+.popup-window--success {
+  background: var(--pale-theme-color);
+  box-shadow: 0 var(--header-box-shadow-offset-y) var(--header-box-shadow-blur-radius) rgb(204, 221, 238);
+}
